@@ -55,7 +55,7 @@ The root `.pre-commit-hooks.yaml` publishes the built-in hook. Reference this re
 
 ```yaml
 repos:
-  - repo: https://github.com/your-org/zero-cost-ai-code-auditor
+  - repo: https://github.com/Anurag058-jp/AI-Autonomous-code-auditor
     rev: v0.1.0
     hooks:
       - id: zero-cost-code-auditor
