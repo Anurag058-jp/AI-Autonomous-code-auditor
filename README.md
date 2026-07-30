@@ -1,4 +1,4 @@
-<img width="1482" height="657" alt="image" src="https://github.com/user-attachments/assets/a712a4ff-067e-457f-9cf3-b9db42d9b4ce" /># AI Autonomous Code Auditor
+# AI Autonomous Code Auditor
 
 Local-first CLI and dashboard for AST-aware repository scanning, hybrid retrieval, OWASP-oriented rules, and optional free-tier LLM recommendations.
 
