@@ -1,0 +1,4 @@
+[console_scripts]
+audit = auditor.cli:app
+audit-api = auditor.api:run
+audit-dashboard = auditor.dashboard:main

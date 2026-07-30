@@ -1,0 +1,24 @@
+services:
+  api:
+    build: .
+    env_file: .env
+    environment:
+      AUDIT_DATA_DIR: /data
+    volumes:
+      - audit-data:/data
+      - ${AUDIT_TARGET_PATH:-.}:/target:ro
+    ports:
+      - "8000:8000"
+  dashboard:
+    build: .
+    env_file: .env
+    command: ["streamlit", "run", "src/auditor/dashboard.py", "--server.address=0.0.0.0"]
+    environment:
+      AUDIT_DATA_DIR: /data
+    volumes:
+      - audit-data:/data
+    ports:
+      - "8501:8501"
+volumes:
+  audit-data:
+

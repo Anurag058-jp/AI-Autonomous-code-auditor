@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: zero-cost-code-auditor
+        name: Zero-Cost AI Code Auditor
+        entry: audit scan
+        language: system
+        types: [python]
+        args: ["--fail-on", "high"]

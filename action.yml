@@ -1,0 +1,58 @@
+name: Zero-Cost AI Code Auditor
+description: Scan a repository, annotate GitHub Actions output, and publish a pull-request summary.
+inputs:
+  path:
+    description: Repository path to scan.
+    required: false
+    default: .
+  fail-on:
+    description: Fail when a finding has this severity or higher. Leave blank to never fail.
+    required: false
+    default: ""
+  groq-api-key:
+    description: Optional Groq API key for LLM enrichment and draft fixes.
+    required: false
+    default: ""
+  format:
+    description: Output format: github, pr-comment, json, or markdown.
+    required: false
+    default: github
+  github-token:
+    description: GitHub token used to create or update PR comments.
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - id: scan
+      shell: bash
+      env:
+        GROQ_API_KEY: ${{ inputs.groq-api-key }}
+      run: |
+        python -m pip install --disable-pip-version-check .
+        args=(audit scan --path "${{ inputs.path }}" --format "${{ inputs.format }}")
+        if [ -n "${{ inputs.fail-on }}" ]; then args+=(--fail-on "${{ inputs.fail-on }}"); fi
+        set +e
+        "${args[@]}" | tee "$RUNNER_TEMP/zero-cost-audit.md"
+        audit_status=${PIPESTATUS[0]}
+        echo "exit-code=$audit_status" >> "$GITHUB_OUTPUT"
+        exit 0
+    - uses: actions/github-script@v7
+      if: ${{ inputs.format == 'pr-comment' && inputs.github-token != '' }}
+      env:
+        AUDIT_COMMENT: ${{ runner.temp }}/zero-cost-audit.md
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const fs = require('fs');
+          const body = fs.readFileSync(process.env.AUDIT_COMMENT, 'utf8');
+          const issue = context.payload.pull_request?.number;
+          if (!issue) { core.info('Not a pull-request event; skipping comment.'); return; }
+          const { owner, repo } = context.repo;
+          const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: issue });
+          const existing = comments.find(comment => comment.user.type === 'Bot' && comment.body.includes('<!-- zero-cost-code-auditor -->'));
+          if (existing) await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+          else await github.rest.issues.createComment({ owner, repo, issue_number: issue, body });
+    - shell: bash
+      if: ${{ steps.scan.outputs.exit-code != '0' }}
+      run: exit 1

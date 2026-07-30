@@ -1,0 +1,7 @@
+- id: zero-cost-code-auditor
+  name: Zero-Cost AI Code Auditor
+  description: Runs local static security and performance checks on staged files.
+  entry: audit scan
+  language: python
+  types: [python]
+  args: ["--fail-on", "high"]

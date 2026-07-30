@@ -1,0 +1,8 @@
+.env
+.audit/
+__pycache__/
+.pytest_cache/
+.venv/
+*.py[cod]
+outputs/
+work/
